@@ -1,0 +1,278 @@
+<!--
+Single-file Web Dashboard
+Save as: single-file-web-dashboard.html
+Open in browser. Includes: responsive sidebar, topbar, cards, table, Chart.js charts, interactive widgets.
+--><!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Single-file Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#0f1724; /* deep navy */
+      --card:#0b1220;
+      --muted:#94a3b8;
+      --accent:#6ee7b7;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --radius:14px;
+      --gap:18px;
+      --max-width:1200px;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Inter',system-ui,Segoe UI,Roboto,-apple-system,Helvetica,Arial;
+      background:linear-gradient(180deg,#071028 0%, #071827 60%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:var(--gap);
+    }
+    .app{
+      width:100%;
+      max-width:var(--max-width);
+      display:grid;
+      grid-template-columns:260px 1fr;
+      gap:var(--gap);
+    }
+    /* SIDEBAR */
+    .side
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:18px;
+      min-height:680px;
+      box-shadow:0 6px 24px rgba(2,6,23,0.6);
+      width:100%;
+      display:flex;flex-direction:column;gap:14px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;color:#062226
+    }
+    .brand h1{font-size:16px;margin:0}
+    .nav{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:var(--muted);text-decoration:none}
+    .nav a:hover{background:var(--glass);color:#e6eef8}
+    .nav a.active{background:rgba(110,231,183,0.12);color:var(--accent)}
+    .nav svg{opacity:0.9}
+    .profile{margin-top:auto;background:var(--glass-2);padding:10px;border-radius:10px;display:flex;gap:12px;align-items:center}
+    .avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,#1e293b,#0b1220);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+    /* MAIN */
+    .main{min-height:680px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .search{flex:1;max-width:520px;background:var(--glass);padding:8px 12px;border-radius:10px;display:flex;align-items:center;gap:10px}
+    input[type=text]{background:transparent;border:0;color:inherit;outline:none;width:100%}
+    .actions{display:flex;gap:10px;align-items:center}
+    .btn{background:linear-gradient(90deg,#111827, #0b1220);padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);}
+    .card h3{margin:0;font-size:13px;color:var(--muted)}
+    .card .value{font-size:22px;font-weight:600;margin-top:8px}
+    .charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:18px}
+    .chart-card{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));}
+    .table{margin-top:18px;border-radius:10px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    thead{background:rgba(255,255,255,0.02)}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.02);font-size:13px}
+    tr:hover td{background:linear-gradient(90deg, rgba(110,231,183,0.02), transparent)}/* responsive */
+@media (max-width: 980px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{order:2;min-height:unset}
+  .main{order:1}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .charts{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .grid{grid-template-columns:1fr}
+}
+
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo">DB</div>
+        <div>
+          <h1>PulseDash</h1>
+          <div style="font-size:12px;color:var(--muted)">Admin dashboard</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 13h8V3H3v10zM3 21h8v-6H3v6zM13 21h8V11h-8v10zM13 3v6h8V3h-8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Overview</a>
+        <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 20v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 10V4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14h16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Analytics</a>
+        <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 7h18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12h18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17h18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reports</a>
+        <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 017 7v3a7 7 0 11-14 0V9a7 7 0 017-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Notifications</a>
+      </nav><div class="profile">
+    <div class="avatar">SM</div>
+    <div style="flex:1">
+      <div style="font-weight:600">Sai Manasa</div>
+      <div style="font-size:12px;color:var(--muted)">Product Manager</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:right">
+      <div id="clock">--:--</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;gap:12px;align-items:center;flex:1">
+      <div class="search" role="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <input type="text" placeholder="Search reports, users, invoices..." id="searchInput">
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="refreshData()">Refresh</button>
+        <button class="btn" id="themeToggle" title="Toggle compact">Compact</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div style="font-size:13px;color:var(--muted)">Welcome back</div>
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,#60a5fa,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021124">SM</div>
+    </div>
+  </div>
+
+  <section class="grid" aria-label="Key metrics">
+    <div class="card">
+      <h3>Active Users</h3>
+      <div class="value" id="usersCount">12,384</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">+4.2% vs last week</div>
+    </div>
+
+    <div class="card">
+      <h3>Revenue</h3>
+      <div class="value">$78,420</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Monthly recurring</div>
+    </div>
+
+    <div class="card">
+      <h3>New Signups</h3>
+      <div class="value">1,042</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Today</div>
+    </div>
+
+    <div class="card">
+      <h3>Server Load</h3>
+      <div class="value">62%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Average (1h)</div>
+    </div>
+  </section>
+
+  <section class="charts">
+    <div class="chart-card card">
+      <h3 style="margin-bottom:6px">Traffic (last 30 days)</h3>
+      <canvas id="lineChart" height="140"></canvas>
+    </div>
+    <div class="chart-card card">
+      <h3 style="margin-bottom:6px">Users by plan</h3>
+      <canvas id="doughnutChart" height="140"></canvas>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px">Free / Pro / Enterprise</div>
+    </div>
+  </section>
+
+  <section class="table card">
+    <table>
+      <thead>
+        <tr><th>User</th><th>Email</th><th>Plan</th><th>Activity</th><th>Revenue</th></tr>
+      </thead>
+      <tbody id="usersTable">
+        <!-- dynamically populated -->
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+  </div>  <script>
+    // Sample data & utilities
+    const usersSample = [
+      ['Asha Kumar','asha@example.com','Pro','Online','$120'],
+      ['Ravi Patel','ravi@example.com','Free','Offline','$0'],
+      ['Leena D','leena@example.com','Enterprise','Online','$1200'],
+      ['Mohit S','mohit@example.com','Pro','Idle','$120'],
+      ['Priya R','priya@example.com','Free','Online','$0']
+    ];
+
+    function populateTable(){
+      const tbody = document.getElementById('usersTable');
+      tbody.innerHTML = '';
+      for(const row of usersSample){
+        const tr = document.createElement('tr');
+        for(let i=0;i<row.length;i++){
+          const td = document.createElement('td');
+          td.textContent = row[i];
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Charts: uses Chart.js from CDN
+    function initCharts(){
+      const ctxLine = document.getElementById('lineChart').getContext('2d');
+      const labels = Array.from({length:30},(_,i)=>`Day ${i+1}`);
+      const data = Array.from({length:30},()=>Math.floor(Math.random()*600)+200);
+      new Chart(ctxLine,{
+        type:'line',
+        data:{labels, datasets:[{label:'Visits',data,fill:true,tension:0.3,pointRadius:0}]},
+        options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{display:false}}}
+      });
+
+      const ctxD = document.getElementById('doughnutChart').getContext('2d');
+      new Chart(ctxD,{type:'doughnut',data:{labels:['Free','Pro','Enterprise'],datasets:[{data:[56,32,12]}]},options:{plugins:{legend:{position:'bottom'}}}});
+    }
+
+    // small UI helpers
+    function refreshData(){
+      // simulate updates
+      document.getElementById('usersCount').textContent = (12000 + Math.floor(Math.random()*2000)).toLocaleString();
+      populateTable();
+    }
+
+    // clock
+    function tickClock(){
+      const el = document.getElementById('clock');
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      el.textContent = `${hh}:${mm}`;
+    }
+
+    // compact toggle
+    document.getElementById('themeToggle').addEventListener('click',()=>{
+      const grid = document.querySelector('.grid');
+      grid.style.gridTemplateColumns = grid.style.gridTemplateColumns ? '' : 'repeat(2,1fr)';
+      document.getElementById('themeToggle').textContent = grid.style.gridTemplateColumns ? 'Cozy' : 'Compact';
+    });
+
+    // search (simple highlight)
+    document.getElementById('searchInput').addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase().trim();
+      const rows = document.querySelectorAll('#usersTable tr');
+      rows.forEach(r=>{
+        r.style.display = Array.from(r.children).some(td=>td.textContent.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    });
+
+    // init
+    populateTable();
+    initCharts();
+    tickClock();
+    setInterval(tickClock,60000);
+  </script></body>
+</html>
